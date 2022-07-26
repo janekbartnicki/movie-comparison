@@ -37,7 +37,7 @@ const createAutocomplete = ({root, renderOption, onOptionSelect, inputValue, fet
             resultsWrapper.appendChild(option);
         }
     }
-    input.addEventListener('input', debunce(onInput, 500));
+    input.addEventListener('input', debunce(onInput, 300));
     
     document.addEventListener('click', event => {
         if(!root.contains(event.target)) {

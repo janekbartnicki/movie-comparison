@@ -4,16 +4,19 @@
 	margin: auto;
 }
 
-figure.image {
-	display: flex;
-	justify-content: center;
-	background-color: black;
-}
+// figure.image {
+// 	display: flex;
+// 	justify-content: center;
+// 	background-color: black;
+// }
 
 figure {
 
 	.image {
-
+		display: flex;
+		justify-content: center;
+		background-color: black;
+		
 		img {
 			width: 128px;
 		}

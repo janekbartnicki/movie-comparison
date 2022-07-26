@@ -1,14 +1,10 @@
-createAutocomplete({
-    root: document.querySelector('.autocomplete'),
+const autocompleteConfig = {
     renderOption(movie) {
         const imgSRC = movie.Poster === 'N/A' ? '' : movie.Poster;
         return `
         <img src="${imgSRC}"/>
         ${movie.Title} (${movie.Year})
     `;
-    },
-    onOptionSelect(movie) {
-        onMovieSelect(movie);
     },
     inputValue(movie) {
         return movie.Title;
@@ -24,9 +20,28 @@ createAutocomplete({
     
         return response.data.Search;
     }
+}
+
+createAutocomplete({
+    ...autocompleteConfig,
+    root: document.querySelector('#left-autocomplete'),
+    onOptionSelect(movie) {
+        document.querySelector('.tutorial').classList.add('is-hidden');
+        onMovieSelect(movie, document.querySelector('#left-summary'), 'left');
+    }
 });
 
-const onMovieSelect = async movie => {
+createAutocomplete({
+    ...autocompleteConfig,
+    root: document.querySelector('#right-autocomplete'),
+    onOptionSelect(movie) {
+        document.querySelector('.tutorial').classList.add('is-hidden');
+        onMovieSelect(movie, document.querySelector('#right-summary'), 'right');
+    }
+});
+
+let leftMovie, rightMovie;
+const onMovieSelect = async (movie, summaryElement, side) => {
     const response = await axios.get('http://www.omdbapi.com', {
         params: {
             apikey: '35e75b8a',
@@ -34,10 +49,32 @@ const onMovieSelect = async movie => {
         }
     });
 
-    document.querySelector('.summary').innerHTML = movieTeplate(response.data);
+    summaryElement.innerHTML = movieTeplate(response.data);
+
+    side === 'left' ? leftMovie = response.data : rightMovie = response.data;
+    if(leftMovie && rightMovie) runComparison();
+}
+
+const runComparison = () => {
+
 }
 
 const movieTeplate = (movieDetail) => {
+    const dollars = Number(movieDetail.BoxOffice.replace(/\$/g, '').replace(/,/g, ''));
+    const metascore = Number(movieDetail.Metascore);
+    const imdbRating = Number(movieDetail.imdbRating);
+    const imdbVotes = Number(movieDetail.imdbVotes.replace(/,/g, ''));
+
+    const awards = movieDetail.Awards.split(' ').reduce((prev, word) => {
+        const value = Number(word);
+        if(isNaN(value)) {
+            return prev;
+        } else {
+            return prev + value;
+        }
+    }, 0);
+    console.log(awards)
+
     return `
         <article class="media">
         <figure class="media-left">
@@ -53,23 +90,23 @@ const movieTeplate = (movieDetail) => {
         </div>
         </div>
     </article>
-    <article class="notification is-primary">
+    <article data-value="${awards}" class="notification is-primary">
         <p class="title">${movieDetail.Awards}</p>
         <p class="subtitle">Awards</p>
     </article>
-    <article class="notification is-primary">
+    <article data-value="${dollars}" class="notification is-primary">
         <p class="title">${movieDetail.BoxOffice}</p>
         <p class="subtitle">Box Office</p>
     </article>
-    <article class="notification is-primary">
+    <article data-value="${metascore}" class="notification is-primary">
         <p class="title">${movieDetail.Metascore}</p>
         <p class="subtitle">Metascore</p>
     </article>
-    <article class="notification is-primary">
+    <article data-value="${imdbRating}" class="notification is-primary">
         <p class="title">${movieDetail.imdbRating}</p>
         <p class="subtitle">IMDb Rating</p>
     </article>
-    <article class="notification is-primary">
+    <article data-value="${imdbVotes}" class="notification is-primary">
         <p class="title">${movieDetail.imdbVotes}</p>
         <p class="subtitle">IMDb Votes</p>
     </article>
